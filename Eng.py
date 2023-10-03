@@ -1,63 +1,77 @@
 import random
+import os
 
-# Đọc dữ liệu từ file data.txt vào một danh sách
-with open("data.txt", "r") as file:
-    lines = file.readlines()
+CWD = os.getcwd()
+CNT_WORD = 0
+IS_STOP = 1
+WORDS = ""
+class Colors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKCYAN = '\033[96m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
 
-# Loại bỏ khoảng trắng và ký tự xuống dòng từ các dòng
-lines = [line.strip() for line in lines]
+#
+# console helpers
+#
+def _set_console_color(color):
+    print(color, end='')
 
-while lines:
-    # Chọn một dòng ngẫu nhiên từ danh sách
+def _reset_console_color():
+    print(Colors.ENDC, end='')
+
+def clear_console():
+    os.system('cls' if os.name=='nt' else 'clear')
+
+def info(msg):
+    _set_console_color(Colors.OKGREEN)
+    print('{}'.format(msg))
+    _reset_console_color()
+
+def oneCycle():
+    global IS_STOP, CNT_WORD, WORDS
+    with open("data.txt", "r") as file:
+        lines = file.readlines()
+
+    lines = [line.strip() for line in lines]
     random_line = random.choice(lines)
-    
-    # In dòng được chọn ra màn hình
-    print(random_line)
-    
-    # Yêu cầu người dùng nhập
-    user_input = input("Nhập 'Y' để giảm giá trị, 'N' để tăng giá trị, hoặc 'E' để lưu và thoát: ").strip().lower()
-    
+    info(random_line)
+    user_input = input("Y,N: ").strip().lower()
     if user_input == 'y':
-        # Tách từ và số từ dòng
         parts = random_line.split(", ")
         word = parts[0]
         value = int(parts[1])
-        
-        # Giảm giá trị đi 1 đơn vị
         value -= 1
-        
-        # Cập nhật lại dòng
-        new_line = f"{word}, {value}\n"
-        
-        # Xoá dòng nếu giá trị là 0
+        new_line = f"{word}, {value}"
+        print(new_line)
         if value == 0:
             lines.remove(random_line)
+            CNT_WORD += 1
         else:
-            # Cập nhật dòng trong danh sách
             lines[lines.index(random_line)] = new_line
-    
     elif user_input == 'n':
-        # Tách từ và số từ dòng
         parts = random_line.split(", ")
         word = parts[0]
         value = int(parts[1])
-        
-        # Tăng giá trị lên 3 đơn vị
         value += 3
-        
-        # Cập nhật lại dòng
-        new_line = f"{word}, {value}\n"
-        
-        # Cập nhật dòng trong danh sách
+        new_line = f"{word}, {value}"
+        WORDS += word + ", "
         lines[lines.index(random_line)] = new_line
-    
     elif user_input == 'e':
-        # Lưu tất cả thay đổi vào file data.txt
-        with open("data.txt", "w") as file:
-            file.writelines(lines)
-        
-        print("Dữ liệu đã được cập nhật và lưu vào file data.txt.")
-        break  # Kết thúc chương trình
+        IS_STOP = 0
+        info(f'You deleted {CNT_WORD}, Learn: {WORDS}')
+    with open("data.txt", "w") as file:
+        for v in lines:
+            v = v + "\n"
+            file.write(v)
 
-# Khi danh sách rỗng hoặc người dùng nhập 'E', thoát khỏi vòng lặp
-print("Danh sách đã hết hoặc bạn đã lựa chọn lưu và thoát!")
+clear_console()
+
+while IS_STOP:
+    oneCycle()
+
