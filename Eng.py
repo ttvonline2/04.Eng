@@ -48,7 +48,6 @@ def oneCycle():
         value = int(parts[1])
         value -= 1
         new_line = f"{word}, {value}"
-        print(new_line)
         if value == 0:
             lines.remove(random_line)
             CNT_WORD += 1
